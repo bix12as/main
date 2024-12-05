@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField } = require('discord.js');
-
+const express = require('express');
 
 // Create an express app to bind to a port
 const app = express();
