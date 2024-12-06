@@ -1,21 +1,16 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField } = require('discord.js');
+const { Client, GatewayIntentBits,ChannelType, Partials, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const express = require('express');
 
-// Create an express app to bind to a port
+// Set up Express server
 const app = express();
-const port = process.env.PORT || 3000; // Use Render's PORT or default to 3000
+const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.send('Hello from the bot app!');
-});
+app.get('/', (req, res) => res.send('Hello from the bot app!'));
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+app.listen(port, () => console.log(`Server running on port ${port}`));
 
-
-
+// Initialize Discord client
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -25,36 +20,116 @@ const client = new Client({
   ],
   partials: [Partials.Message, Partials.Channel, Partials.GuildMember],
 });
+// Menu command to show buttons
+client.on('messageCreate', async (message) => {
+  if (message.content.toLowerCase() === '/menu') {
+    const menuEmbed = new EmbedBuilder()
+      .setColor('Blue')
+      .setTitle('Main Menu')
+      .setDescription('Choose a category to view commands:')
+      .addFields(
+        { name: 'Owner Commands', value: 'Manage server and users' },
+        { name: 'Service Commands', value: 'Explore available services' }
+      );
 
-// Configuration
-const bannedWords = ['nigger, slut']; // Replace with actual banned words
-const ownerID = '1313556003756834856'; // Replace with your Discord user ID
-const spamLimit = 4; // Messages allowed in time window
-const spamTimeWindow = 10000; // Time window in ms (10 seconds)
-const raidThreshold = 5; // Members allowed in 30 seconds
-const spamRoleName = 'Spam'; // Role assigned to spammers
-const verifiedRoleName = 'Verified'; // Role to remove when user is spamming
-const muteDuration = 600000; // 10 minutes in milliseconds
+    const buttons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('owner_commands')
+        .setLabel('Owner Commands')
+        .setStyle('Primary'),
+      new ButtonBuilder()
+        .setCustomId('service_commands')
+        .setLabel('Service Commands')
+        .setStyle('Secondary')
+    );
+
+    await message.channel.send({ embeds: [menuEmbed], components: [buttons] });
+  }
+});
+
+// Handle button interactions
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isButton()) return;
+
+  if (interaction.customId === 'owner_commands') {
+    const ownerEmbed = new EmbedBuilder()
+      .setColor('Green')
+      .setTitle('Owner Commands')
+      .setDescription(`
+**Available Commands:**
+- \`!kick @user\` - Kick a user from the server.
+- \`!ban @user\` - Ban a user from the server.
+- \`!clear <number>\` - Clear a specified number of messages.
+- \`!menu\` - Show the command menu.
+`)
+      .setFooter({ text: 'Use these commands responsibly!' });
+
+    await interaction.update({ embeds: [ownerEmbed], components: [getMenuButtons()] });
+  }
+
+  if (interaction.customId === 'service_commands') {
+    const serviceEmbed = new EmbedBuilder()
+      .setColor('Gold')
+      .setTitle('Service Commands')
+      .setDescription(`
+**CoD BO6 Bot Lobbies Instructions**
+
+- **Complete challenges faster**: In Bot Lobbies, you can unlock camos, complete objectives, and progress through challenges as quickly as possible without the frustration of regular SBMM matches.
+- Do Not Kill the real player in the enermy team! Bots are easily to be identified.
+- When you choose Bot Lobby,Never Call a Nuke. Call a nuke will cause the game to end prematurely. , and we will deduct one game as punishment.
+- **Improve your stats**: Your kill/death ratio (K/D) can be improved to a certain extent by controlling BO6 Bot Lobbies and improving your overall game performance.
+- **Upgrade your weapons**: Black Ops 6 Bot Lobbies allow you to quickly upgrade your guns by getting high kills with little effort.
+
+**Commands:**
+- \`!service bo6\` - View BO6 service details.
+      `)
+      .setFooter({ text: 'Contact support for more information.' });
+
+    await interaction.update({ embeds: [serviceEmbed], components: [getMenuButtons()] });
+  }
+});
+
+// Function to return the menu buttons for re-use
+function getMenuButtons() {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('owner_commands')
+      .setLabel('Owner Commands')
+      .setStyle('Primary'),
+    new ButtonBuilder()
+      .setCustomId('service_commands')
+      .setLabel('Service Commands')
+      .setStyle('Secondary')
+  );
+}
+
+
+// Configurations
+const bannedWords = ['nigger', 'slut']; // Example: Replace with actual banned words
+const ownerID = '1313556003756834856';
+const spamLimit = 4;
+const spamTimeWindow = 10000;
+const raidThreshold = 5;
+const spamRoleName = 'Spam';
+const verifiedRoleName = 'Verified';
+const muteDuration = 600000; // 10 minutes
 
 // Trackers
 const messageCounts = {};
-const userWarnings = {};
 const memberJoinTimestamps = {};
 
-// Ready Event
-// Ready Event
+// On bot ready
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  
-  updateUptime(); // Call the function initially
+  updateUptime();
   setInterval(updateUptime, 60000); // Update every minute
 });
 
-// Function to update the bot's bio with uptime
+// Update bot's presence with uptime
 function updateUptime() {
   const uptimeSeconds = Math.floor(process.uptime());
-  const days = Math.floor(uptimeSeconds / (3600 * 24));
-  const hours = Math.floor((uptimeSeconds % (3600 * 24)) / 3600);
+  const days = Math.floor(uptimeSeconds / 86400);
+  const hours = Math.floor((uptimeSeconds % 86400) / 3600);
   const minutes = Math.floor((uptimeSeconds % 3600) / 60);
   const seconds = uptimeSeconds % 60;
 
@@ -66,14 +141,32 @@ function updateUptime() {
   });
 }
 
-
+// Message handling
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
+  // Handle owner commands
+  if (message.author.id === ownerID && message.content.startsWith('!')) {
+    handleOwnerCommands(message);
+    return;
+  }
+
+  // Handle service commands
+  if (message.content.startsWith('!service')) {
+    handleServiceCommands(message);
+    return;
+  }
+
+  // Handle spam prevention and banned words
+  handleSpamAndBannedWords(message);
+});
+
+// Handle spam and banned words
+function handleSpamAndBannedWords(message) {
   const userId = message.author.id;
   const currentTime = Date.now();
 
-  // SPAM PREVENTION
+  // Spam prevention
   if (!messageCounts[userId]) {
     messageCounts[userId] = { count: 1, timestamp: currentTime };
   } else {
@@ -82,183 +175,245 @@ client.on('messageCreate', async (message) => {
 
   if (currentTime - messageCounts[userId].timestamp <= spamTimeWindow) {
     if (messageCounts[userId].count > spamLimit) {
-      // Find the roles
-      const spamRole = message.guild.roles.cache.find(role => role.name === spamRoleName);
-      const verifiedRole = message.guild.roles.cache.find(role => role.name === verifiedRoleName);
-
-      if (!spamRole || !verifiedRole) {
-        console.error(`Roles "${spamRoleName}" or "${verifiedRoleName}" not found!`);
-        return;
-      }
-
-      const member = message.guild.members.cache.get(userId);
-      if (!member.roles.cache.has(spamRole.id)) {
-        // Remove Verified role and add Spam role
-        await member.roles.remove(verifiedRole).catch(console.error);
-        await member.roles.add(spamRole).catch(console.error);
-
-        const spamEmbed = new EmbedBuilder()
-          .setColor('Red')
-          .setTitle('Spam Detected')
-          .setDescription(`❌ You have been muted for spamming. The Verified role has been removed, and you will be unmuted in 10 minutes.`)
-          .setFooter({ text: 'Please follow server rules.' });
-
-        await message.channel.send({ embeds: [spamEmbed] });
-
-        // Schedule role changes after 10 minutes
-        setTimeout(async () => {
-          await member.roles.remove(spamRole).catch(console.error);
-          await member.roles.add(verifiedRole).catch(console.error);
-
-          const unmuteEmbed = new EmbedBuilder()
-            .setColor('Green')
-            .setTitle('Unmuted')
-            .setDescription(`✅ You have been unmuted and your Verified role has been restored.`)
-            .setFooter({ text: 'Please avoid spamming in the future.' });
-
-          await message.channel.send({ embeds: [unmuteEmbed], content: `<@${userId}>` });
-        }, muteDuration);
-      }
+      handleSpam(message, userId);
     }
   } else {
     messageCounts[userId] = { count: 1, timestamp: currentTime };
-}
-
-
-  // BANNED WORDS FILTER
-  const lowerCaseMessage = message.content.toLowerCase();
-  for (const word of bannedWords) {
-    if (lowerCaseMessage.includes(word)) {
-      await message.delete().catch(console.error);
-      const filterEmbed = new EmbedBuilder()
-        .setColor('Red')
-        .setTitle('Inappropriate Language')
-        .setDescription('❌ Your message contained banned language.')
-        .setFooter({ text: 'Please follow the server rules.' });
-
-      return message.channel.send({ embeds: [filterEmbed] });
-    }
   }
 
-  // COMMAND HANDLING (OWNER ONLY)
-  if (message.author.id !== ownerID) return;
+  // Banned words filter
+  for (const word of bannedWords) {
+    if (message.content.toLowerCase().includes(word)) {
+      message.delete().catch(console.error);
+      message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setColor('Red')
+            .setTitle('Inappropriate Language')
+            .setDescription('❌ Your message contained banned language.')
+            .setFooter({ text: 'Please follow the server rules.' }),
+        ],
+      });
+      return;
+    }
+  }
+}
 
-  const prefix = '!';
-  if (!message.content.startsWith(prefix)) return;
+// Handle spam actions
+async function handleSpam(message, userId) {
+  const member = message.guild.members.cache.get(userId);
+  const spamRole = message.guild.roles.cache.find((role) => role.name === spamRoleName);
+  const verifiedRole = message.guild.roles.cache.find((role) => role.name === verifiedRoleName);
 
-  const args = message.content.slice(prefix.length).trim().split(/ +/);
+  if (!spamRole || !verifiedRole) {
+    console.error(`Roles "${spamRoleName}" or "${verifiedRoleName}" not found!`);
+    return;
+  }
+
+  if (!member.roles.cache.has(spamRole.id)) {
+    await member.roles.remove(verifiedRole).catch(console.error);
+    await member.roles.add(spamRole).catch(console.error);
+
+    const spamEmbed = new EmbedBuilder()
+      .setColor('Red')
+      .setTitle('Spam Detected')
+      .setDescription('❌ You have been muted for spamming. You will be unmuted in 10 minutes.')
+      .setFooter({ text: 'Please follow server rules.' });
+
+    await message.channel.send({ embeds: [spamEmbed] });
+
+    setTimeout(async () => {
+      await member.roles.remove(spamRole).catch(console.error);
+      await member.roles.add(verifiedRole).catch(console.error);
+
+      message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setColor('Green')
+            .setTitle('Unmuted')
+            .setDescription('✅ You have been unmuted.')
+            .setFooter({ text: 'Please avoid spamming in the future.' }),
+        ],
+        content: `<@${userId}>`,
+      });
+    }, muteDuration);
+  }
+}
+
+// Handle owner commands
+function handleOwnerCommands(message) {
+  const args = message.content.slice(1).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  // KICK COMMAND
   if (command === 'kick') {
     const member = message.mentions.members.first();
     if (!member) return message.reply('❌ Please mention a user to kick.');
     if (!message.guild.me.permissions.has(PermissionsBitField.Flags.KickMembers)) {
-      return message.reply('❌ I need "Kick Members" permission.');
+      return message.reply('❌ I need the Kick Members permission.');
     }
 
     member.kick().then(() => {
       message.reply({
         embeds: [
-          new EmbedBuilder()
-            .setColor('Green')
-            .setTitle('User Kicked')
-            .setDescription(`${member.user.tag} was kicked.`),
+          new EmbedBuilder().setColor('Green').setTitle('User Kicked').setDescription(`${member.user.tag} was kicked.`),
         ],
       });
-    }).catch(err => {
-      console.error(err);
-      message.reply('❌ Failed to kick the user.');
-    });
+    }).catch(console.error);
   }
 
-  // BAN COMMAND
   if (command === 'ban') {
     const member = message.mentions.members.first();
     if (!member) return message.reply('❌ Please mention a user to ban.');
     if (!message.guild.me.permissions.has(PermissionsBitField.Flags.BanMembers)) {
-      return message.reply('❌ I need "Ban Members" permission.');
+      return message.reply('❌ I need the Ban Members permission.');
     }
 
     member.ban().then(() => {
       message.reply({
         embeds: [
-          new EmbedBuilder()
-            .setColor('Red')
-            .setTitle('User Banned')
-            .setDescription(`${member.user.tag} was banned.`),
+          new EmbedBuilder().setColor('Red').setTitle('User Banned').setDescription(`${member.user.tag} was banned.`),
         ],
       });
-    }).catch(err => {
-      console.error(err);
-      message.reply('❌ Failed to ban the user.');
-    });
+    }).catch(console.error);
   }
 
-// CLEAR COMMAND
-if (command === 'clear') {
-  const amount = parseInt(args[0]);
-  if (isNaN(amount) || amount <= 0 || amount > 100) {
-    return message.reply('❌ Provide a number between 1 and 100.');
+  if (command === 'clear') {
+    const amount = parseInt(args[0]);
+    if (isNaN(amount) || amount <= 0 || amount > 100) {
+      return message.reply('❌ Provide a number between 1 and 100.');
+    }
+
+    message.channel.bulkDelete(amount, true).then(() => {
+      message.channel.send({
+        embeds: [
+          new EmbedBuilder().setColor('Blue').setTitle(`Deleted ${amount} messages.`),
+        ],
+      }).then((msg) => setTimeout(() => msg.delete().catch(console.error), 5000));
+    }).catch(console.error);
   }
-
-  const messages = await message.channel.messages.fetch({ limit: amount });
-
-  // Bulk delete messages and send a confirmation
-  message.channel.bulkDelete(messages, true).then(() => {
-    message.channel.send({
-      embeds: [
-        new EmbedBuilder()
-          .setColor('Blue')
-          .setTitle(`Deleted ${messages.size} messages.`),
-      ],
-    }).then(msg => {
-      // Delete the confirmation message after 5 seconds
-      setTimeout(() => msg.delete().catch(console.error), 5000);
-    });
-  }).catch(err => {
-    console.error(err);
-    message.reply('❌ Failed to clear messages.').then(msg => {
-      setTimeout(() => msg.delete().catch(console.error), 5000);
-    });
-  });
 }
 
-
-  // MENU COMMAND
-  if (command === 'menu') {
-    const menuEmbed = new EmbedBuilder()
-      .setColor('Blue')
-      .setTitle('Bot Commands')
+// Handle service commands
+client.on('messageCreate', async (message) => {
+  if (message.content.startsWith('/service bo6')) {
+    const serviceEmbed = new EmbedBuilder()
+      .setColor('Gold')
+      .setTitle('BO6 Bot Lobbies')
       .setDescription(`
-**Moderation Commands:**
-- \`!kick @user\` - Kick a user.
-- \`!ban @user\` - Ban a user.
-- \`!clear <number>\` - Delete messages.
-- \`!banlist\` - List banned users.
+**Welcome to the BO6 Bot Lobby Service!** 🎮
 
-**Use these commands responsibly.**
-      `);
+We offer fast, efficient, and affordable bot lobbies for leveling up and unlocking items in Call of Duty: Black Ops 6. Here's everything you need to know:
+---
+**Pricing:**
+- **Basic Lobby:** R45/game
 
-    message.reply({ embeds: [menuEmbed] });
+**Game Mode:** Domination
+- 200 points wins
+- 30-minute matches
+- 200 headshots per game
+---
+**How It Works:**
+1. Click the button below to purchase the **Basic Lobby**.
+2. Join the bot lobby invite you'll receive.
+3. Once in the game, **switch sides** to place 5 bots on the other team, and get headshots to level up quickly.
+4. **Enjoy** unlocking items and progressing faster than ever!
+---
+**Need Help?** 🤔
+If you run into any issues or need further assistance, feel free to reach out to our support team!
+**Get started now!**
+`)
+      .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp') // Replace with the actual image URL you want to display
+      .setFooter({ text: 'Contact support for help.' });
+
+    const buttons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Basic Lobby').setStyle('Primary'),
+    );
+
+    await message.channel.send({ embeds: [serviceEmbed], components: [buttons] });
+  }
+});
+;
+
+
+
+// Interaction handler for button press
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isButton()) return;
+
+  if (interaction.customId === 'buy_basic') {
+    // Create a private ticket channel without a category
+    const ticketChannel = await interaction.guild.channels.create({
+      name: `ticket-${interaction.user.username}`, // Unique name for the ticket
+      type: ChannelType.GuildText, // Text channel
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id, // Deny permissions for everyone else
+          deny: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: interaction.user.id, // Allow the user to send messages and view the channel
+          allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: ownerID, // Replace with the actual owner's ID
+          allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel], // Owner has full access
+        },
+      ],
+    });
+
+    // Send a message in the ticket channel
+    const ticketEmbed = new EmbedBuilder()
+      .setColor('Gold')
+      .setTitle('Ticket Created')
+      .setDescription(`Hello ${interaction.user.username}, your ticket has been created. Please follow the instructions to proceed with purchasing the Basic Lobby.`)
+      .setFooter({ text: 'A staff member will assist you soon.' });
+
+    const closeButton = new ButtonBuilder()
+      .setCustomId('close_ticket')
+      .setLabel('Close Ticket')
+      .setStyle(2) // Primary button style
+      .setDisabled(false); // Enable the button
+
+    const buttonRow = new ActionRowBuilder().addComponents(closeButton);
+
+    await ticketChannel.send({
+      embeds: [ticketEmbed],
+      components: [buttonRow],
+    });
+
+    // Notify the user that their ticket has been created
+    await interaction.reply({
+      content: `✅ Your ticket has been created: ${ticketChannel}. Please follow the instructions there.`,
+      ephemeral: true,
+    });
+  }
+
+  // Handle ticket closure by the owner
+  if (interaction.customId === 'close_ticket') {
+    // Ensure only the owner or the ticket creator can close the ticket
+    const ticketChannel = interaction.channel;
+
+    if (interaction.user.id !== ownerID && interaction.user.id !== ticketChannel.name.split('-')[1]) {
+      return interaction.reply({
+        content: '❌ You do not have permission to close this ticket.',
+        ephemeral: true,
+      });
+    }
+
+    // Send a confirmation message before deleting the ticket
+    const confirmEmbed = new EmbedBuilder()
+      .setColor('Red')
+      .setTitle('Ticket Closed')
+      .setDescription('The ticket will be closed and deleted shortly.');
+
+    await interaction.reply({ embeds: [confirmEmbed], ephemeral: true });
+
+    // Delete the ticket channel after a short delay
+    setTimeout(() => {
+      ticketChannel.delete().catch(console.error);
+    }, 5000); // Delay to give users time to see the confirmation
   }
 });
 
-// RAID PREVENTION
-client.on('guildMemberAdd', (member) => {
-  const now = Date.now();
-  memberJoinTimestamps[member.id] = now;
-
-  const recentJoins = Object.values(memberJoinTimestamps).filter(t => now - t <= 30000); // 30s window
-  if (recentJoins.length > raidThreshold) {
-    member.kick('Potential raid detected.').catch(console.error);
-  }
-});
-
+// Login bot
 client.login(process.env.TOKEN);
-
-
-
-
-
-
