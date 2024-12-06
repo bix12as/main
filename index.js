@@ -57,10 +57,10 @@ client.on('interactionCreate', async (interaction) => {
       .setTitle('Owner Commands')
       .setDescription(`
 **Available Commands:**
-- \`!kick @user\` - Kick a user from the server.
-- \`!ban @user\` - Ban a user from the server.
-- \`!clear <number>\` - Clear a specified number of messages.
-- \`!menu\` - Show the command menu.
+- \`/kick @user\` - Kick a user from the server.
+- \`/ban @user\` - Ban a user from the server.
+- \`/clear <number>\` - Clear a specified number of messages.
+- \`/menu\` - Show the command menu.
 `)
       .setFooter({ text: 'Use these commands responsibly!' });
 
@@ -81,7 +81,7 @@ client.on('interactionCreate', async (interaction) => {
 - **Upgrade your weapons**: Black Ops 6 Bot Lobbies allow you to quickly upgrade your guns by getting high kills with little effort.
 
 **Commands:**
-- \`!service bo6\` - View BO6 service details.
+- \`/service bo6\` - View BO6 service details.
       `)
       .setFooter({ text: 'Contact support for more information.' });
 
@@ -146,13 +146,13 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
   // Handle owner commands
-  if (message.author.id === ownerID && message.content.startsWith('!')) {
+  if (message.author.id === ownerID && message.content.startsWith('/')) {
     handleOwnerCommands(message);
     return;
   }
 
   // Handle service commands
-  if (message.content.startsWith('!service')) {
+  if (message.content.startsWith('/service')) {
     handleServiceCommands(message);
     return;
   }
