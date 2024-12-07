@@ -297,20 +297,12 @@ function handleOwnerCommands(message) {
 
 
   // Handle service commands
-// Handle service commands
-function handleServiceCommands(message) {
-  // You can check if the user has permission to use this command
-  if (message.author.id !== ownerID) {
-    return message.reply('❌ You do not have permission to use this command.');
-  }
-
-  const args = message.content.slice(8).trim().split(/ +/); // Adjust to capture command argument after '/service'
-  const command = args.shift().toLowerCase();
-  if (command === 'bo6') {
-    const serviceEmbed = new EmbedBuilder()
-      .setColor('Gold')
-      .setTitle('BO6 Bot Lobbies')
-      .setDescription(`
+client.on('messageCreate', async (message) => {
+    if (message.content.startsWith('/service bo6')) {
+      const serviceEmbed = new EmbedBuilder()
+        .setColor('Gold')
+        .setTitle('BO6 Bot Lobbies')
+        .setDescription(`
 **Welcome to the BO6 Bot Lobby Service!** 🎮
 
 We offer fast, efficient, and affordable bot lobbies for leveling up and unlocking items in Call of Duty: Black Ops 6. Here's everything you need to know:
@@ -334,20 +326,18 @@ We offer fast, efficient, and affordable bot lobbies for leveling up and unlocki
 If you run into any issues or need further assistance, feel free to reach out to our support team!
 **Get started now!**
 `)
-      .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp')
-      .setFooter({ text: 'Contact support for help.' });
+        .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp') // Replace with the actual image URL you want to display
+        .setFooter({ text: 'Contact support for help.' });
 
-    const buttons = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Basic Lobby').setStyle('Primary'),
-      new ButtonBuilder().setCustomId('buy_full').setLabel('Buy Full Bot Lobby').setStyle('Primary')
-    );
+      // Add buttons for both the Mixed Lobby and Full Bot Lobby
+      const buttons = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Basic Lobby').setStyle('Primary'),
+        new ButtonBuilder().setCustomId('buy_full').setLabel('Buy Full Bot Lobby').setStyle('Primary')
+      );
 
-    message.channel.send({ embeds: [serviceEmbed], components: [buttons] });
-  }
-}
-
-
-
+      await message.channel.send({ embeds: [serviceEmbed], components: [buttons] });
+    }
+});
 
   
 
