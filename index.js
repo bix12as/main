@@ -328,7 +328,7 @@ If you run into any issues or need further assistance, feel free to reach out to
 
       // Add buttons for both the Mixed Lobby and Full Bot Lobby
       const buttons = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Basic Lobby').setStyle('Primary'),
+        new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Mixed Lobby').setStyle('Primary'),
         new ButtonBuilder().setCustomId('buy_full').setLabel('Buy Full Bot Lobby').setStyle('Primary')
       );
 
