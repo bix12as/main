@@ -75,13 +75,12 @@ client.on('interactionCreate', async (interaction) => {
 **CoD BO6 Bot Lobbies Instructions**
 
 - **Complete challenges faster**: In Bot Lobbies, you can unlock camos, complete objectives, and progress through challenges as quickly as possible without the frustration of regular SBMM matches.
-- Do Not Kill the real player in the enermy team! Bots are easily to be identified.
-- When you choose Bot Lobby,Never Call a Nuke. Call a nuke will cause the game to end prematurely. , and we will deduct one game as punishment.
-- **Improve your stats**: Your kill/death ratio (K/D) can be improved to a certain extent by controlling BO6 Bot Lobbies and improving your overall game performance.
-- **Upgrade your weapons**: Black Ops 6 Bot Lobbies allow you to quickly upgrade your guns by getting high kills with little effort.
+- Do Not Kill the real player in the enemy team! Bots are easily identified.
+- **Improve your stats**: Your kill/death ratio (K/D) can be improved by controlling BO6 Bot Lobbies.
 
-**Commands:**
-- \`/service bo6\` - View BO6 service details.
+- **BOT LOBBIES**
+- \`Mixed Lobby\` - Join a low level, low kill match, play with bad users (Real players/bots).
+- \`Full Bot Lobby\` - 10 Full Bot accounts, Only 1 real player (you).
       `)
       .setFooter({ text: 'Contact support for more information.' });
 
@@ -293,9 +292,21 @@ function handleOwnerCommands(message) {
   }
 }
 
+
+
+
+
+  // Handle service commands
 // Handle service commands
-client.on('messageCreate', async (message) => {
-  if (message.content.startsWith('/service bo6')) {
+function handleServiceCommands(message) {
+  // You can check if the user has permission to use this command
+  if (message.author.id !== ownerID) {
+    return message.reply('❌ You do not have permission to use this command.');
+  }
+
+  const args = message.content.slice(8).trim().split(/ +/); // Adjust to capture command argument after '/service'
+  const command = args.shift().toLowerCase();
+  if (command === 'bo6') {
     const serviceEmbed = new EmbedBuilder()
       .setColor('Gold')
       .setTitle('BO6 Bot Lobbies')
@@ -305,42 +316,46 @@ client.on('messageCreate', async (message) => {
 We offer fast, efficient, and affordable bot lobbies for leveling up and unlocking items in Call of Duty: Black Ops 6. Here's everything you need to know:
 ---
 **Pricing:**
-- **Basic Lobby:** R45/game
+- **Mixed Lobby:** R25/game
+- **Full Bot Lobby:** R45/game
 
 **Game Mode:** Domination
 - 200 points wins
 - 30-minute matches
-- 200 headshots per game
+- 150 headshots per game
 ---
 **How It Works:**
-1. Click the button below to purchase the **Basic Lobby**.
+1. Click the button below to purchase the **Mixed Lobby** or **Full Bot Lobby**.
 2. Join the bot lobby invite you'll receive.
-3. Once in the game, **switch sides** to place 5 bots on the other team, and get headshots to level up quickly.
+3. Once in the game, **switch sides** to place the bots on the other team, and get headshots to level up quickly.
 4. **Enjoy** unlocking items and progressing faster than ever!
 ---
 **Need Help?** 🤔
 If you run into any issues or need further assistance, feel free to reach out to our support team!
 **Get started now!**
 `)
-      .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp') // Replace with the actual image URL you want to display
+      .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp')
       .setFooter({ text: 'Contact support for help.' });
 
     const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Basic Lobby').setStyle('Primary'),
+      new ButtonBuilder().setCustomId('buy_full').setLabel('Buy Full Bot Lobby').setStyle('Primary')
     );
 
-    await message.channel.send({ embeds: [serviceEmbed], components: [buttons] });
+    message.channel.send({ embeds: [serviceEmbed], components: [buttons] });
   }
-});
-;
+}
 
 
+
+
+  
 
 // Interaction handler for button press
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isButton()) return;
 
-  if (interaction.customId === 'buy_basic') {
+  if (interaction.customId === 'buy_basic' || interaction.customId === 'buy_full') {
     // Create a private ticket channel without a category
     const ticketChannel = await interaction.guild.channels.create({
       name: `ticket-${interaction.user.username}`, // Unique name for the ticket
@@ -365,7 +380,7 @@ client.on('interactionCreate', async (interaction) => {
     const ticketEmbed = new EmbedBuilder()
       .setColor('Gold')
       .setTitle('Ticket Created')
-      .setDescription(`Hello ${interaction.user.username}, your ticket has been created. Please follow the instructions to proceed with purchasing the Basic Lobby.`)
+      .setDescription(`Hello ${interaction.user.username}, your ticket has been created. Please follow the instructions to proceed with purchasing the ${interaction.customId === 'buy_basic' ? 'Basic Lobby' : 'Full Bot Lobby'}.`)
       .setFooter({ text: 'A staff member will assist you soon.' });
 
     const closeButton = new ButtonBuilder()
@@ -414,6 +429,7 @@ client.on('interactionCreate', async (interaction) => {
     }, 5000); // Delay to give users time to see the confirmation
   }
 });
+
 
 // Login bot
 client.login(process.env.TOKEN);
