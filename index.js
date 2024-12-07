@@ -292,12 +292,9 @@ function handleOwnerCommands(message) {
   }
 }
 
-
-
-
-
+// Handle service commands
   // Handle service commands
-client.on('messageCreate', async (message) => {
+  client.on('messageCreate', async (message) => {
     if (message.content.startsWith('/service bo6')) {
       const serviceEmbed = new EmbedBuilder()
         .setColor('Gold')
@@ -339,7 +336,7 @@ If you run into any issues or need further assistance, feel free to reach out to
     }
 });
 
-  
+
 
 // Interaction handler for button press
 client.on('interactionCreate', async (interaction) => {
