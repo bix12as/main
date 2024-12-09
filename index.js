@@ -377,6 +377,7 @@ Start your journey now! 🔥
           .setCustomId('buy_full') // Ensure IDs match in the handler
           .setLabel('Buy Full Bot Lobby - R45')
           .setStyle('Primary')
+          .setDisabled(true)
       );
 
       await message.channel.send({
