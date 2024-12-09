@@ -20,32 +20,42 @@ const client = new Client({
   ],
   partials: [Partials.Message, Partials.Channel, Partials.GuildMember],
 });
-// Menu command to show buttons
+
+// menu
 client.on('messageCreate', async (message) => {
   if (message.content.toLowerCase() === '/menu') {
     const menuEmbed = new EmbedBuilder()
       .setColor('Blue')
-      .setTitle('Main Menu')
-      .setDescription('Choose a category to view commands:')
+      .setTitle('📋 Main Menu')
+      .setDescription('Explore the available categories below:')
       .addFields(
-        { name: 'Owner Commands', value: 'Manage server and users' },
-        { name: 'Service Commands', value: 'Explore available services' }
-      );
+        { name: '🔧 Owner Commands', value: 'Manage server settings and users.', inline: true },
+        { name: '🎮 Service Bo6', value: 'Check out our Bot Lobbies.', inline: true },
+        { name: '🚧 Service Codm', value: 'Coming soon! Stay tuned.', inline: true }
+      )
+      .setFooter({ text: 'Use the buttons below to navigate through the options.' });
 
     const buttons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('owner_commands')
-        .setLabel('Owner Commands')
+        .setLabel('🔧 Owner Commands')
         .setStyle('Primary'),
       new ButtonBuilder()
-        .setCustomId('service_commands')
-        .setLabel('Service Commands')
+        .setCustomId('service_bo6')
+        .setLabel('🎮 Service Bo6')
+        .setStyle('Secondary'),
+      new ButtonBuilder()
+        .setCustomId('service_codm')
+        .setLabel('🚧 Service Codm')
         .setStyle('Secondary')
+        .setDisabled(true) // Disable the button since it's coming soon
     );
 
     await message.channel.send({ embeds: [menuEmbed], components: [buttons] });
   }
 });
+
+
 
 // Handle button interactions
 client.on('interactionCreate', async (interaction) => {
@@ -67,10 +77,10 @@ client.on('interactionCreate', async (interaction) => {
     await interaction.update({ embeds: [ownerEmbed], components: [getMenuButtons()] });
   }
 
-  if (interaction.customId === 'service_commands') {
+  if (interaction.customId === 'service_bo6') {
     const serviceEmbed = new EmbedBuilder()
       .setColor('Gold')
-      .setTitle('Service Commands')
+      .setTitle('Service bo6')
       .setDescription(`
 **CoD BO6 Bot Lobbies Instructions**
 
@@ -79,13 +89,33 @@ client.on('interactionCreate', async (interaction) => {
 - **Improve your stats**: Your kill/death ratio (K/D) can be improved by controlling BO6 Bot Lobbies.
 
 - **BOT LOBBIES**
-- \`Mixed Lobby\` - Join a low level, low kill match, play with bad users (Real players/bots).
+- \`Mixed Lobby\` - Join a low level, low kill match, play with bad users (Real players/bots) latency 300, location USA.
 - \`Full Bot Lobby\` - 10 Full Bot accounts, Only 1 real player (you).
       `)
-      .setFooter({ text: 'Contact support for more information.' });
+      .setFooter({ text: 'Credit Card Payments Only - Yoco Payment Link.' });
 
     await interaction.update({ embeds: [serviceEmbed], components: [getMenuButtons()] });
   }
+
+  if (interaction.customId === 'service_codm') {
+    const serviceEmbed = new EmbedBuilder()
+      .setColor('Gold')
+      .setTitle('Service Codm')
+      .setDescription(`
+  **Codm Bot Lobbies Instructions**
+  
+  - **Complete challenges faster**: In Bot Lobbies, you can unlock camos, complete objectives, and progress through challenges as quickly as possible without the frustration of regular SBMM matches.
+  - Do Not Kill the real player in the enemy team! Bots are easily identified.
+  - **Improve your stats**: Your kill/death ratio (K/D) can be improved by controlling Codm Bot Lobbies.
+  
+  - **BOT LOBBIES**
+  - \`Full Bot Lobby\` - 10 Full Bot accounts, Only 1 real player (you).
+      `)
+      .setFooter({ text: 'Credit Card Payments Only - Yoco Payment Link.' });
+  
+    await interaction.update({ embeds: [serviceEmbed], components: [getMenuButtons()] });
+  }
+  
 });
 
 // Function to return the menu buttons for re-use
@@ -93,12 +123,17 @@ function getMenuButtons() {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('owner_commands')
-      .setLabel('Owner Commands')
+      .setLabel('🔧 Owner Commands')
       .setStyle('Primary'),
     new ButtonBuilder()
-      .setCustomId('service_commands')
-      .setLabel('Service Commands')
+      .setCustomId('service_bo6')
+      .setLabel('🎮 Service Bo6')
+      .setStyle('Secondary'),
+    new ButtonBuilder()
+      .setCustomId('service_codm')
+      .setLabel('🚧 Service Codm')
       .setStyle('Secondary')
+      .setDisabled(true) // Disable the button since it's coming soon
   );
 }
 
@@ -292,130 +327,206 @@ function handleOwnerCommands(message) {
   }
 }
 
+
 // Handle service commands
-  // Handle service commands
-  client.on('messageCreate', async (message) => {
-    if (message.content.startsWith('/service bo6')) {
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.content.toLowerCase().startsWith('/service bo6')) {
       const serviceEmbed = new EmbedBuilder()
         .setColor('Gold')
-        .setTitle('BO6 Bot Lobbies')
+        .setTitle('🎮 BO6 Bot Lobbies Service')
         .setDescription(`
-**Welcome to the BO6 Bot Lobby Service!** 🎮
+**Welcome to the BO6 Bot Lobby Service!**
 
-We offer fast, efficient, and affordable bot lobbies for leveling up and unlocking items in Call of Duty: Black Ops 6. Here's everything you need to know:
+We provide efficient and affordable bot lobbies for **Call of Duty: Black Ops 6**, helping you level up and unlock items faster!
+
 ---
-**Pricing:**
-- **Mixed Lobby:** R25/game
+
+**📋 Pricing:**
+- **Mixed Lobby:** R5/game
 - **Full Bot Lobby:** R45/game
 
-**Game Mode:** Domination
-- 200 points wins
-- 30-minute matches
-- 150 headshots per game
----
-**How It Works:**
-1. Click the button below to purchase the **Mixed Lobby** or **Full Bot Lobby**.
-2. Join the bot lobby invite you'll receive.
-3. Once in the game, **switch sides** to place the bots on the other team, and get headshots to level up quickly.
-4. **Enjoy** unlocking items and progressing faster than ever!
----
-**Need Help?** 🤔
-If you run into any issues or need further assistance, feel free to reach out to our support team!
-**Get started now!**
-`)
-        .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp') // Replace with the actual image URL you want to display
-        .setFooter({ text: 'Contact support for help.' });
+**🎮 Game Mode: Domination**
+- Matches last **30 minutes**.
+- **200 points wins**.
+- **Up to 150 headshots per game**!
 
-      // Add buttons for both the Mixed Lobby and Full Bot Lobby
+---
+
+**🚀 How It Works:**
+1. Click the button below to purchase a **Mixed Lobby** or **Full Bot Lobby**.
+2. Follow the invite instructions provided after payment.
+3. **Enjoy** fast progression and unlocking new items!
+
+---
+
+**❓ Need Help?**
+Reach out to our support team if you have any questions or issues.
+
+Start your journey now! 🔥
+        `)
+        .setImage('https://mitchcactus.co/nitropack_static/FhDfyRqwHafuFlnqYqbLYqWLshmFdhix/assets/images/optimized/rev-2582f9a/mitchcactus.co/wp-content/uploads/2024/10/How-to-Get-Bot-Lobbies-in-Black-Ops-6-768x369.webp') // Replace with your image URL
+        .setFooter({ text: 'Payments accepted via Yoco. Credit Card only.' });
+
       const buttons = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('buy_basic').setLabel('Buy Mixed Lobby').setStyle('Primary'),
-        new ButtonBuilder().setCustomId('buy_full').setLabel('Buy Full Bot Lobby').setStyle('Primary')
+        new ButtonBuilder()
+          .setCustomId('buy_mixed') // Ensure IDs match in the handler
+          .setLabel('Buy Mixed Lobby - R5')
+          .setStyle('Primary'),
+        new ButtonBuilder()
+          .setCustomId('buy_full') // Ensure IDs match in the handler
+          .setLabel('Buy Full Bot Lobby - R45')
+          .setStyle('Primary')
       );
 
-      await message.channel.send({ embeds: [serviceEmbed], components: [buttons] });
+      await message.channel.send({
+        embeds: [serviceEmbed],
+        components: [buttons],
+      });
     }
+  } catch (error) {
+    console.error('Error handling /service command:', error);
+    await message.channel.send('⚠️ An error occurred while processing your request. Please try again later.');
+  }
+});
+
+client.on('messageCreate', async (message) => {
+  try {
+    if (message.content.toLowerCase().startsWith('/service codm')) {
+      const serviceEmbed = new EmbedBuilder()
+        .setColor('Gold')
+        .setTitle('🎮 Codm Bot Lobbies Service')
+        .setDescription(`
+**Welcome to the Codm Bot Lobby Service!**
+
+We provide efficient and affordable bot lobbies for **Call of Duty: Mobile**, helping you level up and unlock items faster!
+
+---
+
+**📋 Pricing:**
+- **Full Bot Lobby:** R5/game
+
+**🎮 Game Mode: Domination**
+- Matches last **30 minutes**.
+- **200 points wins**.
+- **Up to 150 headshots per game**!
+
+---
+
+**🚀 How It Works:**
+1. Click the button below to purchase a **Full Bot Lobby**.
+2. Follow the invite instructions provided after payment.
+3. **Enjoy** fast progression and unlocking new items!
+
+---
+
+**❓ Need Help?**
+Reach out to our support team if you have any questions or issues.
+
+Start your journey now! 🔥
+        `)
+        .setImage('https://cdn.prod.website-files.com/65956e2711516206d2d1258f/6634c7715af10f24b00dc7b1_CODM%202663x1384-p-1080.webp') // Replace with your image URL
+        .setFooter({ text: 'Payments accepted via Yoco. Credit Card only.' });
+
+      const buttons = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('buy_full') // Ensure IDs match in the handler
+          .setLabel('Buy Full Bot Lobby - R5')
+          .setStyle('Primary')
+      );
+
+      await message.channel.send({
+        embeds: [serviceEmbed],
+        components: [buttons],
+      });
+    }
+  } catch (error) {
+    await message.channel.send('⚠️ An error occurred while processing your request. Please try again later.');
+  }
 });
 
 
 
-// Interaction handler for button press
+// Handle interaction events for button clicks
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isButton()) return;
 
-  if (interaction.customId === 'buy_basic' || interaction.customId === 'buy_full') {
-    // Create a private ticket channel without a category
-    const ticketChannel = await interaction.guild.channels.create({
-      name: `ticket-${interaction.user.username}`, // Unique name for the ticket
-      type: ChannelType.GuildText, // Text channel
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id, // Deny permissions for everyone else
-          deny: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: interaction.user.id, // Allow the user to send messages and view the channel
-          allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: ownerID, // Replace with the actual owner's ID
-          allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel], // Owner has full access
-        },
-      ],
-    });
+  try {
+    if (interaction.customId === 'buy_mixed' || interaction.customId === 'buy_full') {
+      // Create a private ticket channel
+      const ticketChannel = await interaction.guild.channels.create({
+        name: `ticket-${interaction.user.username}`, // Unique name for the ticket
+        type: ChannelType.GuildText, // Text channel
+        permissionOverwrites: [
+          {
+            id: interaction.guild.id, // Deny permissions for everyone
+            deny: [PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: interaction.user.id, // Allow the user access
+            allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel],
+          },
+          {
+            id: ownerID, // Allow the owner full access
+            allow: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ViewChannel],
+          },
+        ],
+      });
 
-    // Send a message in the ticket channel
-    const ticketEmbed = new EmbedBuilder()
-      .setColor('Gold')
-      .setTitle('Ticket Created')
-      .setDescription(`Hello ${interaction.user.username}, your ticket has been created. Please follow the instructions to proceed with purchasing the ${interaction.customId === 'buy_basic' ? 'Basic Lobby' : 'Full Bot Lobby'}.`)
-      .setFooter({ text: 'A staff member will assist you soon.' });
+      const ticketEmbed = new EmbedBuilder()
+        .setColor('Gold')
+        .setTitle('Ticket Created')
+        .setDescription(`Hello ${interaction.user.username}, your ticket has been created. Please follow the instructions to proceed with purchasing the ${interaction.customId === 'buy_mixed' ? 'Mixed Lobby' : 'Full Bot Lobby'}.`)
+        .setFooter({ text: 'A staff member will assist you shortly.' });
 
-    const closeButton = new ButtonBuilder()
-      .setCustomId('close_ticket')
-      .setLabel('Close Ticket')
-      .setStyle(2) // Primary button style
-      .setDisabled(false); // Enable the button
+      const closeButton = new ButtonBuilder()
+        .setCustomId('close_ticket') // Ensure the close button has its own ID
+        .setLabel('Close Ticket')
+        .setStyle('Danger');
 
-    const buttonRow = new ActionRowBuilder().addComponents(closeButton);
+      const buttonRow = new ActionRowBuilder().addComponents(closeButton);
 
-    await ticketChannel.send({
-      embeds: [ticketEmbed],
-      components: [buttonRow],
-    });
+      await ticketChannel.send({
+        embeds: [ticketEmbed],
+        components: [buttonRow],
+      });
 
-    // Notify the user that their ticket has been created
-    await interaction.reply({
-      content: `✅ Your ticket has been created: ${ticketChannel}. Please follow the instructions there.`,
-      ephemeral: true,
-    });
-  }
-
-  // Handle ticket closure by the owner
-  if (interaction.customId === 'close_ticket') {
-    // Ensure only the owner or the ticket creator can close the ticket
-    const ticketChannel = interaction.channel;
-
-    if (interaction.user.id !== ownerID && interaction.user.id !== ticketChannel.name.split('-')[1]) {
-      return interaction.reply({
-        content: '❌ You do not have permission to close this ticket.',
-        ephemeral: true,
+      await interaction.reply({
+        content: `✅ Your ticket has been created: ${ticketChannel}. Please follow the instructions there.`,
+        ephemeral: true, // Only visible to the user who clicked the button
       });
     }
 
-    // Send a confirmation message before deleting the ticket
-    const confirmEmbed = new EmbedBuilder()
-      .setColor('Red')
-      .setTitle('Ticket Closed')
-      .setDescription('The ticket will be closed and deleted shortly.');
+    if (interaction.customId === 'close_ticket') {
+      const ticketChannel = interaction.channel;
 
-    await interaction.reply({ embeds: [confirmEmbed], ephemeral: true });
+      // Only allow ticket creator or owner to close the ticket
+      const ticketOwner = ticketChannel.name.split('-')[1];
+      if (interaction.user.id !== ownerID && interaction.user.username !== ticketOwner) {
+        return interaction.reply({
+          content: '❌ You do not have permission to close this ticket.',
+          ephemeral: true,
+        });
+      }
 
-    // Delete the ticket channel after a short delay
-    setTimeout(() => {
-      ticketChannel.delete().catch(console.error);
-    }, 5000); // Delay to give users time to see the confirmation
+      await interaction.reply({
+        content: '✅ Closing ticket. This channel will be deleted shortly.',
+        ephemeral: true,
+      });
+
+      setTimeout(() => {
+        ticketChannel.delete().catch(console.error);
+      }, 5000); // 5-second delay for visibility
+    }
+  } catch (error) {
+    await interaction.reply({
+      content: '⚠️ An error occurred while processing your action. Please try again later.',
+      ephemeral: true,
+    });
   }
 });
+
+
 
 
 // Login bot
